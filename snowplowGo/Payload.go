@@ -25,23 +25,21 @@ import (
 	"time"
 )
 
-var TimeStamp string
-
-var NameValuePair map[string]int64
-var paraValue {}int64
+Payload := map[string]int64{}
 
 /**
 * Initialize a Payload instance, contains an array in which event parameters are stored (type int64)
 *
 */
 
-func InitPayload() {
+func (p *Payload) InitPayload( TimeStamp string ) {
+	var paraValue int64
 	if TimeStamp != nil {
 		paraValue = (int64)(TimeStamp)
 	} else {
 		paraValue = ((int64)(time.Now()) - http.Server.ReadTimeout) * 1000
 	}
-	Add("dtm", paraValue)
+	p.Add("dtm", paraValue)
 }
 
 /**
@@ -51,9 +49,9 @@ func InitPayload() {
 * @param int64 value - int64 for map
 */
 
-func Add(name string, value int64) {
+func (p *Payload) Add(name string, value int64) {
 	if value != nil && value != "" {
-		NameValuePair[name] = value
+		p.Payload[name] = value
 	}
 }
 
@@ -63,9 +61,9 @@ func Add(name string, value int64) {
 * @param array dict - Single level array of name:value pairs
 */
 
-func AddDict(dict) {
+func (p *Payload) AddDict(dict) {
 	for name, element := range dict {
-		Add(name, element)
+		p.Add(name, element)
 	}
 }
 
@@ -79,13 +77,13 @@ func AddDict(dict) {
 * @param string NameNotEncode
 */
 
-func AddJson(json map[string]string, Base64 bool, NameEncoded string, NameNotEncode string) {
+func (p *Payload) AddJson(json map[string]string, Base64 bool, NameEncoded string, NameNotEncode string) {
 	if json != nil {
 		if Base64 {
-			Add(NameEncoded, b64.StdEncoding.EncodeToString(json.Marshal(json)))
+			p.Add(NameEncoded, b64.StdEncoding.EncodeToString(json.Marshal(json)))
 		}
 	} else {
-		Add(NameNotEncode, json.Marshal(json))
+		p.Add(NameNotEncode, json.Marshal(json))
 
 	}
 

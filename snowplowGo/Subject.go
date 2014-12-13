@@ -26,9 +26,18 @@ const (
 
 var TrackerSettings map[string]string
 
+type Subject struct {
+	p string
+	res string
+	vp string
+	uid string
+	cd string
+	tz string
+	lang string
+}
 //Initialize Subject.go
-func InitSubject() {
-	TrackerSettings["p"] = DEFAULT_PLATFORM
+func (s *Subject) InitSubject() {
+	s.p = DEFAULT_PLATFORM
 }
 
 //Remember about getSubject as golang variable type access
@@ -37,8 +46,8 @@ func InitSubject() {
 *
 * @param string platform
 */
-func SetPlatform(platform string) {
-	TrackerSettings["p"] = platform
+func (s *Subject) SetPlatform(platform string) {
+	s.p = platform
 }
 
  /**
@@ -47,8 +56,8 @@ func SetPlatform(platform string) {
 * @param string userId
 */
 
-func SetUserId(userId string) {
-	TrackerSettings["uid"] = userId
+func (s *Subject) SetUserId(userId string) {
+	s.uid = userId
 }
 
 /**
@@ -57,8 +66,8 @@ func SetUserId(userId string) {
 * @param int width
 * @param int height
 */
-func SetScreenResolution(width int, height int) {
-	TrackerSettings["res"] = strconv.Itoa(width) + "x" + strconv.Itoa(height)
+func (s *Subject) SetScreenResolution(width int, height int) {
+	s.res = strconv.Itoa(width) + "x" + strconv.Itoa(height)
 }
 
 /**
@@ -67,8 +76,8 @@ func SetScreenResolution(width int, height int) {
 * @param int width
 * @param int height
 */
-func SetViewPort(width int, height int) {
-	TrackerSettings["vp"] = strconv.Itoa(width) + "x" + strconv.Itoa(height)
+func (s *Subject) SetViewPort(width int, height int) {
+	s.vp = strconv.Itoa(width) + "x" + strconv.Itoa(height)
 }
 
  /**
@@ -76,8 +85,8 @@ func SetViewPort(width int, height int) {
 *
 * @param int depth
 */
-func SetColorDepth(depth int) {
-	TrackerSettings["cd"] = strconv.Itoa(depth)
+func (s *Subject) SetColorDepth(depth int) {
+	s.cd = strconv.Itoa(depth)
 }
 
 /**
@@ -85,8 +94,8 @@ func SetColorDepth(depth int) {
 *
 * @param string timezone
 */
-func SetTimeZone(timezone string) {
-	TrackerSettings["tz"] = timezone
+func (s *Subject) SetTimeZone(timezone string) {
+	s.tz = timezone
 }
 
  /**
@@ -94,6 +103,6 @@ func SetTimeZone(timezone string) {
 *
 * @param string language
 */
-func SetLanguage(language string) {
-	TrackerSettings["lang"] = language
+func (s *Subject) SetLanguage(language string) {
+	s.lang = language
 }

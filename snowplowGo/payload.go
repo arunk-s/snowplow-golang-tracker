@@ -19,7 +19,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
-	"net/url"
 	"time"
 )
 
@@ -35,6 +34,7 @@ func (p *Payload) InitPayload( TimeStamp string ) {
 	if TimeStamp != nil {
 		paraValue := (int64)(TimeStamp)
 	} else {
+		// TODO(alexanderdean): what is http.Server.ReadTimeout?
 		paraValue = ((int64)(time.Now()) - http.Server.ReadTimeout) * 1000
 	}
 	p.Add("dtm", paraValue)
@@ -58,14 +58,14 @@ func (p *Payload) AddDict(dict) {
 
 // Adds a JSON formatted array to the payload.
 // Json encodes the array first (turns it into a string) and then will encode (or not) the string in base64
-func (p *Payload) AddJson(json map[string]string, Base64 bool, NameEncoded string, NameNotEncode string) {
-	if json != nil {
+// TODO(alexanderdean): JSON as a string->string map is very narrow (should be string->interface?)
+func (p *Payload) AddJson(instance map[string]string, Base64 bool, NameEncoded string, NameNotEncode string) {
+	if instance != nil {
 		if Base64 {
-			p.Add(NameEncoded, b64.StdEncoding.EncodeToString(json.Marshal(json)))
+			p.Add(NameEncoded, base64.StdEncoding.EncodeToString(json.Marshal(instance)))
 		}
 	} else {
-		p.Add(NameNotEncode, json.Marshal(json))
+		p.Add(NameNotEncode, json.Marshal(instance))
 
 	}
-
 }

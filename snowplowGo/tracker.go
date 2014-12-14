@@ -34,9 +34,9 @@ const (
 type Tracker struct {
 	EncodeBase64 bool
 	StdNvPairs struct {
-		tv  string  TRACKER_VERSION
-			tna string
-			aid string
+		tv  string
+		tna string
+		aid string
 	}
 	JsonSchema struct {
 		ContextSchema       string
@@ -136,7 +136,7 @@ func (t *Tracker) TrackPageView(pageUrl string, pageTitle string, referrer strin
 
 // Tracks a structured event with the aforementioned metrics
 func (t *Tracker) TrackStructEvent(category string, action string, label string, property string, value string, context string, tstamp string) {
-	var ep  Payload(tstamp)
+	var ep  Payload
 	ep.InitPayload(tstamp)
 	ep.Add("e", "se")
 	ep.Add("se_ca", category)

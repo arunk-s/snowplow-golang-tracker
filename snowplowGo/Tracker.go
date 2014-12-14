@@ -177,3 +177,26 @@ func (t *Tracker) TrackPageView(pageUrl string, pageTitle string, referrer strin
 	payloadEp.Add("refr", referrer)
 	t.Track(payloadEp, context)
 }
+
+/**
+     * Tracks a structured event with the aforementioned metrics
+     *
+     * @param string category - Event Category
+     * @param string action - Event itself
+     * @param string label - Refers to the string the action is performed on
+     * @param string property - Property associated with either the action or the object
+     * @param int value - A value associated with the user action
+     * @param string context - Event Context
+     * @param int tstamp - Event Timestamp
+     */
+    func (t *Tracker) TrackStructEvent(category string, action string, label string, property string, value string, context string, tstamp string) {
+        var ep  Payload(tstamp)
+        ep.InitPayload(tstamp)
+        ep.Add("e", "se")
+        ep.Add("se_ca", category)
+        ep.Add("se_ac", action)
+        ep.Add("se_la", label)
+        ep.Add("se_pr", property)
+        ep.Add("se_va", value)
+        t.Track(ep, context)
+    }

@@ -34,23 +34,18 @@ const (
 )
 
 type Tracker struct {
-	Emitter      Emitter
-	subject      Subject
 	EncodeBase64 bool
+	StdNvPairs struct {
+		tv  string  TRACKER_VERSION
+	        tna string
+	        aid string
+	}
+	JsonSchema struct {
+		ContextSchema       string
+		UnstructEventSchema string
+		ScreenViewSchema    string
+	}
 }
-
-// Building Json Schema
-type JsonSchema struct {
-	ContextSchema       string
-	UnstructEventSchema string
-	ScreenViewSchema    string
-}
-
-var scehma JsonSchema
-
-var StdNvPairs map[string]string
-
-var s Tracker
 
 
 /**
@@ -62,26 +57,26 @@ var s Tracker
 * @param string AppId
 * @param string EncodeBase64 - Boolean stating whether or not to encode certain values as base64
 */
-func InitTracker(emitterTracker map[string]string, subject Subject, namespace string, AppId string, EncodeBase64 string) {
+func (t *Tracker) InitTracker(emitterTracker map[string]string, subject Subject, namespace string, AppId string, EncodeBase64 string) {
 	if len(emitterTracker) > 0 {
-		s.emitter = emitterTracker
+		t.emitter = emitterTracker
 	} else {
-		s.emitter = emitterTracker
+		t.emitter = emitterTracker
 	}
-	s.subject = subject
-	if s.EncodeBase64 != nil {
-		s.EncodeBase64 = StringToBool(s.EncodeBase64)
+	t.subject = subject
+	if t.EncodeBase64 != nil {
+		t.EncodeBase64 = StringToBool(t.EncodeBase64)
 	} else {
-		s.EncodeBase64 = DEFAULT_BASE_64
+		t.EncodeBase64 = DEFAULT_BASE_64
 	}
 
-	StdNvPairs["tv"] = TRACKER_VERSION
-	StdNvPairs["tna"] = namespace
-	StdNvPairs["aid"] = AppId
+	t.StdNvPairs.tv = TRACKER_VERSION
+	t.StdNvPairs.tna = namespace
+	t.StdNvPairs.aid = AppId
 
-	schema.ContextSchema = BASE_SCHEMA_PATH + "/contexts/" + SCHEMA_TAG + "/1-0-0"
-	schema.UnstructEventSchema = BASE_SCHEMA_PATH + "/unstruct_event/" + SCHEMA_TAG + "/1-0-0"
-	schema.ScreenViewSchema = BASE_SCHEMA_PATH + "/screen_view/" + SCHEMA_TAG + "/1-0-0"
+	t.JsonSchema.ContextSchema = BASE_SCHEMA_PATH + "/contexts/" + SCHEMA_TAG + "/1-0-0"
+	t.JsonSchema.UnstructEventSchema = BASE_SCHEMA_PATH + "/unstruct_event/" + SCHEMA_TAG + "/1-0-0"
+	t.JsonSchema.ScreenViewSchema = BASE_SCHEMA_PATH + "/screen_view/" + SCHEMA_TAG + "/1-0-0"
 }
 
 /**
@@ -89,8 +84,8 @@ func InitTracker(emitterTracker map[string]string, subject Subject, namespace st
 *
 * @param Subject subject
 */
-func UpdateSubject(subject Subject) {
-	s.Subject = subject
+func (t *Tracker) UpdateSubject(subject Subject) {
+	t.Subject = subject
 }
 
  /**
@@ -98,8 +93,8 @@ func UpdateSubject(subject Subject) {
 *
 * @param Emitter emitter
 */
-func AddEmitter(emitter Emitter) {
-	append(s.Emitter, emitter)
+func (t *Tracker) AddEmitter(emitter Emitter) {
+	append(t.Emitter, emitter)
 }
 
  // Emitter Send Functions
@@ -108,9 +103,9 @@ func AddEmitter(emitter Emitter) {
 *
 * @param Payload payload
 */
-func SendRequest(payload Payload) {
+func (t *Tracker) SendRequest(payload Payload) {
 	finalPayload = ReturnArrayStringify("strval", payload)
-	for _, element := range s.Emitter {
+	for _, element := range t.Emitter {
 		element.SendEvent(finalPayload)
 	}
 }

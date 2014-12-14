@@ -1,18 +1,17 @@
 /*
-Subject.go
-Copyright (c) 2014 Snowplow Analytics Ltd. All rights reserved.
+Copyright (c) 2014-2015 Snowplow Analytics Ltd. All rights reserved.
+
 This program is licensed to you under the Apache License Version 2.0,
 and you may not use this file except in compliance with the Apache License
 Version 2.0. You may obtain a copy of the Apache License Version 2.0 at
-http://www.apache.org/licenses/LICENSE-2.0.
+
+    http://www.apache.org/licenses/LICENSE-2.0.
+
 Unless required by applicable law or agreed to in writing,
 software distributed under the Apache License Version 2.0 is distributed on
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 express or implied. See the Apache License Version 2.0 for the specific
 language governing permissions and limitations there under.
-Authors: Aalekh Nigam
-Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
-License: Apache License Version 2.0
 */
 package snowplowGo
 
@@ -35,74 +34,43 @@ type Subject struct {
 	tz string
 	lang string
 }
-//Initialize Subject.go
+
+// Initializes the Subject
 func (s *Subject) InitSubject() {
 	s.p = DEFAULT_PLATFORM
 }
 
-//Remember about getSubject as golang variable type access
- /**
-* Sets the platform from which the event is fired
-*
-* @param string platform
-*/
+// Sets the platform from which the event is fired
 func (s *Subject) SetPlatform(platform string) {
 	s.p = platform
 }
 
- /**
-* Sets a custom user identification for the event
-*
-* @param string userId
-*/
-
+// Sets a custom user identification for the event
 func (s *Subject) SetUserId(userId string) {
 	s.uid = userId
 }
 
-/**
-* Sets the screen resolution
-*
-* @param int width
-* @param int height
-*/
+// Sets the screen resolution
 func (s *Subject) SetScreenResolution(width int, height int) {
 	s.res = strconv.Itoa(width) + "x" + strconv.Itoa(height)
 }
 
-/**
-* Sets the view port resolution
-*
-* @param int width
-* @param int height
-*/
+// Sets the view port resolution
 func (s *Subject) SetViewPort(width int, height int) {
 	s.vp = strconv.Itoa(width) + "x" + strconv.Itoa(height)
 }
 
- /**
-* Sets the colour depth
-*
-* @param int depth
-*/
+// Sets the screen's color depth
 func (s *Subject) SetColorDepth(depth int) {
 	s.cd = strconv.Itoa(depth)
 }
 
-/**
-* Sets the event timezone
-*
-* @param string timezone
-*/
+// Sets the event timezone
 func (s *Subject) SetTimeZone(timezone string) {
 	s.tz = timezone
 }
 
- /**
-* Sets the language used
-*
-* @param string language
-*/
+// Sets the language used
 func (s *Subject) SetLanguage(language string) {
 	s.lang = language
 }

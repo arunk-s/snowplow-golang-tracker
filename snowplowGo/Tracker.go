@@ -200,3 +200,31 @@ func (t *Tracker) TrackPageView(pageUrl string, pageTitle string, referrer strin
         ep.Add("se_va", value)
         t.Track(ep, context)
     }
+
+    /**
+     * Creates an event for each item in the ecommerceTransaction item 
+     *
+     * @param string OrderId - Order ID inherited from trackEcommerceTransaction
+     * @param string sku - Product SKU, identity of the product
+     * @param float price - Product Price
+     * @param int quantity - Quantity of product purchased
+     * @param string name - Name of product
+     * @param string category - Product category
+     * @param string currency - Currency, inherited from trackEcommerceTransaction
+     * @param []string context - Event Context
+     * @param int tstamp - Event Timestamp
+     */
+    func (t *Tracker) TrackEcommerceTransactionItems(orderId string, sku string, price float, quantity string, name string, $category string, currency string, context string, tstamp string) {
+        var ep Payload
+        ep.InitPayload(tstamp)
+        ep.Add("e", "ti");
+        ep.Add("ti_id", order_id);
+        ep.Add("ti_pr", price);
+        ep.Add("ti_sk", sku);
+        ep.Add("ti_qu", quantity);
+        ep.Add("ti_nm", name);
+        ep.Add("ti_ca", category);
+        ep.Add("ti_cu", currency);
+        t.Track(ep, context);
+    }
+}

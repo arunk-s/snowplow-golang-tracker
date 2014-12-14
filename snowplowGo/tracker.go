@@ -136,8 +136,7 @@ func (t *Tracker) TrackPageView(pageUrl string, pageTitle string, referrer strin
 
 // Tracks a structured event with the aforementioned metrics
 func (t *Tracker) TrackStructEvent(category string, action string, label string, property string, value string, context string, tstamp string) {
-	var ep  Payload
-	ep.InitPayload(tstamp)
+	ep := InitPayload(tstamp)
 	ep.Add("e", "se")
 	ep.Add("se_ca", category)
 	ep.Add("se_ac", action)
@@ -148,9 +147,8 @@ func (t *Tracker) TrackStructEvent(category string, action string, label string,
 }
 
 // Creates an event for each item in the ecommerceTransaction item 
-func (t *Tracker) TrackEcommerceTransactionItems(orderId string, sku string, price float, quantity string, name string, $category string, currency string, context string, tstamp string) {
-	var ep Payload
-	ep.InitPayload(tstamp)
+func (t *Tracker) TrackEcommerceTransactionItems(orderId string, sku string, price float, quantity string, name string, category string, currency string, context string, tstamp string) {
+	ep := InitPayload(tstamp)
 	ep.Add("e", "ti")
 	ep.Add("ti_id", order_id)
 	ep.Add("ti_pr", price)

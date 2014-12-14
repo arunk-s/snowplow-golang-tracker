@@ -41,6 +41,14 @@ type Tracker struct {
 	}
 }
 
+type Items struct {
+	sku string
+	price string 
+	quantity string
+    name string 
+    category string
+}
+
 // Initializes a new tracker instance with emitter(s) and a subject.
 func (t *Tracker) InitTracker(emitterTracker map[string]string, subject Subject, namespace string, AppId string, EncodeBase64 string) {
 
@@ -180,4 +188,24 @@ func (t *Tracker) TrackScreenView(name string,id string, context string, tstamp 
 	epJson["schema"] = t.JsonSchema.ScreenViewSchema
 	epJson["data"] = ScreenViewProperties
 	t.TrackUnstructEvent(epJson, context, tstamp) 	
-} 
+}
+
+
+//Tracks an ecommerce transaction event, can contain many items
+func TrackEcommerceTransaction(orderId string, totalValue string, currency string, affiliation string, taxValue string, shipping string, city string, state string, country string, items Items, context string, tstamp string) {
+	ep := InitPayload(tstamp)
+	ep.Add("e", "tr")
+    ep.Add("tr_id", orderId)
+    ep.Add("tr_tt", totalValue)
+    ep.Add("tr_cu", currency)
+    ep.Add("tr_af", affiliation)
+    ep.Add("tr_tx", taxValue)
+    ep.Add("tr_sh", shipping)
+    ep.Add("tr_ci", city)
+    ep.Add("tr_st", state)
+    ep.Add("tr_co", country)	
+    t.Track(ep, context)
+    for _,element := range items {
+    	t.TrackEcommerceTransactionItems(orderId, element.sku, element.price, element.quantity, element.name, element.category, currency, context, tstamp)
+	}
+}

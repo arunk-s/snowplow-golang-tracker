@@ -166,3 +166,18 @@ func (t *Tracker) TrackUnstructEvent(eventJson string, context string, tstamp st
 	ep.AddJson(envelope, t.EncodeBase64, "ue_px", "ue_pr")
 	t.Track(ep, context)
 }
+
+
+//Tracks a screen view event with the metrics
+func (t *Tracker) TrackScreenView(name string,id string, context string, tstamp string) {
+	var ScreenViewProperties, epJson map[string]string
+	if name != nil {
+		ScreenViewProperties["name"] = name
+	}
+	if id != nil {
+		ScreenViewProperties["id"] = id	
+	}
+	epJson["schema"] = t.JsonSchema.ScreenViewSchema
+	epJson["data"] = ScreenViewProperties
+	t.TrackUnstructEvent(epJson, context, tstamp) 	
+} 

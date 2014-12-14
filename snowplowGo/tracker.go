@@ -13,13 +13,9 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 express or implied. See the Apache License Version 2.0 for the specific
 language governing permissions and limitations there under.
 */
-package snowplowGo
+package main
 
 import (
-	"encoding/base64"
-	"encoding/json"
-	"net/http"
-	"net/url"
 	"time"
 )
 
@@ -157,5 +153,16 @@ func (t *Tracker) TrackEcommerceTransactionItems(orderId string, sku string, pri
 	ep.Add("ti_nm", name)
 	ep.Add("ti_ca", category)
 	ep.Add("ti_cu", currency)
+	t.Track(ep, context)
+}
+
+//Tracks an unstructured event with the aforementioned metrics
+func (t *Tracker) TrackUnstructEvent(eventJson string, context string, tstamp string){
+	var envelope map[string]string
+	envelope["schema"] = t.JsonSchema.UnstructEventSchema
+	envelope["data"] = eventJson
+	ep := InitPayload(tstamp)
+	ep.Add("e","ue")
+	ep.AddJson(envelope, t.EncodeBase64, "ue_px", "ue_pr")
 	t.Track(ep, context)
 }

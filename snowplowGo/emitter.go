@@ -18,6 +18,7 @@ package snowplowGo
 import (
 	"fmt"
 	"net/url"
+	// "net/http"
 )
 
 // Constants for sending a payload
@@ -26,8 +27,8 @@ const (
 	DEFAULT_PROTOCOL    = "http"
 	DEFAULT_BUFFER_SIZE = 10
 
-	SCHEMA_VENDOR       = "com.snowplowanalytics.snowplow"
-	SCHEMA_FORMAT       = "jsonschema"
+	SCHEMA_VENDOR = "com.snowplowanalytics.snowplow"
+	SCHEMA_FORMAT = "jsonschema"
 )
 
 type Emitter struct {
@@ -43,56 +44,67 @@ type Emitter struct {
 // Intitialize emitter to send event data to a collector
 func (e *Emitter) InitEmitter(collectorUri string, reqType string, protocol string, bufferSize int) Emitter {
 
-	emitter.PostRequestSchema = fmt.Sprintf("iglu:%s/payload_data/%s/1-0-2", SCHEMA_VENDOR, SCHEMA_FORMAT)
+	e.PostRequestSchema = fmt.Sprintf("iglu:%s/payload_data/%s/1-0-2", SCHEMA_VENDOR, SCHEMA_FORMAT)
 	if reqType != "" {
-		emitter.ReqType = reqType
+		e.ReqType = reqType
 	} else {
-		emitter.ReqType = DEFAULT_REQ_TYPE
+		e.ReqType = DEFAULT_REQ_TYPE
 	}
 	if protocol != "" {
-		emitter.Protocol = protocol
+		e.Protocol = protocol
 	} else {
-		emitter.Protocol = DEFAULT_PROTOCOL
+		e.Protocol = DEFAULT_PROTOCOL
 	}
-	emitter.CollectorUrl = e.ReturnCollectorUrl(collectorUri)
-	if bufferSize == nil {
-		if emitter.ReqType == "POST" {
-			emitter.bufferSize = DEFAULT_BUFFER_SIZE
+	var err error
+	e.CollectorUrl, err = e.ReturnCollectorUrl(collectorUri)
+	if err != nil {
+		panic("URL Parse failed")
+	}
+	if bufferSize == 0 {
+		if e.ReqType == "POST" {
+			e.BufferSize = DEFAULT_BUFFER_SIZE
 		} else {
-			emitter.bufferSize = 1
+			e.BufferSize = 1
 		}
 	} else {
-		emitter.bufferSize = (int)(BufferSize)
+		e.BufferSize = (int)(bufferSize)
 	}
-	emitter.bufferSize = nil // TODO(alexanderdean): won't this overwrite the assignments above?
-	emitter.RequestsResult = nil
-	return emitter
+	e.BufferSize = 0 // TODO(alexanderdean): won't this overwrite the assignments above?
+	e.RequestsResult = nil
+	return *e
 }
 
 // Returns the collector URL based on: request type, protocol and host given
 // If a bad type is given in emitter creation, returns nil.
-func (e *Emitter) ReturnCollectorUrl( host string) url.URL {
-	switch e.reqType {
+func (e *Emitter) ReturnCollectorUrl(host string) (url.URL, error) {
+	var urlEncoded *url.URL
+	switch e.ReqType {
 	case "POST":
-		url = e.protocol + "://" + host + "/com.snowplowanalytics.snowplow/tp2"
-		urlEncoded = url.Parse(url)
-		return urlEncoded
+		rawurl := e.Protocol + "://" + host + "/com.snowplowanalytics.snowplow/tp2"
+		urlEncoded, err := url.Parse(rawurl)
+		if err != nil {
+			return *urlEncoded, err
+		}
+		return *urlEncoded, nil
 	case "GET":
-		url = e.protocol + "://" + host + "/i?"
-		urlEncoded = url.Parse(url)
-		return urlEncoded
+		rawurl := e.Protocol + "://" + host + "/i?"
+		urlEncoded, err := url.Parse(rawurl)
+		if err != nil {
+			return *urlEncoded, err
+		}
+		return *urlEncoded, nil
 	default:
-		return nil
+		return *urlEncoded, nil
 	}
 
 }
 
 // Pushes the event payload into the emitter buffer.
 // When buffer is full it flushes the buffer.
-func (e *Emitter) SendEvent( finalPayload []string) {
-	Extend(e.Buffer, finalPayload)
+func (e *Emitter) SendEvent(finalPayload []string) {
+	e.Buffer = append(e.Buffer, finalPayload...)
 	if len(e.Buffer) >= e.BufferSize {
-		Flush()
+		e.Buffer = make([]string, e.BufferSize) //Flushed
 	}
 
 }
@@ -103,12 +115,15 @@ func (e *Emitter) SendEvent( finalPayload []string) {
 func (e *Emitter) Flush(emitter Emitter) {
 	if len(emitter.Buffer) != 0 {
 		if emitter.ReqType == "POST" {
-			data := emitter.ReturnPostRequest
-			e.PostRequest(data)
+			data := emitter.ReturnPostRequest()
+			e.PostRequest(data["data"])
 		} else if emitter.ReqType == "GET" {
-			for _, value := range emitter.Buffer {
-				e.GetRequest(data)
-			}
+
+			// for _, value := range emitter.Buffer {
+			// 	e.GetRequest(value)
+			// }
+			// Maybe trying to do the following
+			e.GetRequest(e.Buffer)
 		}
 		emitter.Buffer = nil
 	}
@@ -116,26 +131,28 @@ func (e *Emitter) Flush(emitter Emitter) {
 
 // Sends the payload to the collector via a GET request
 func (e *Emitter) GetRequest(data []string) {
-	r := url.Get(HttpBuildQuery(data))
-	e.StoreRequestResults(r)
+	// r := url.Get(HttpBuildQuery(data)) Doesn't Work this way. Maybe using http.Get
+	// r := http.Get(HttpBuildQuery(data)) //HttpBuildQuery() Undefined.
+	// e.StoreRequestResults(r)
+	// currently doing nothing
 }
 
 // Sends the payload to the collector via a POST request
 func (e *Emitter) PostRequest(data []string) {
-	m = make(map[string]string)
+	m := make(map[string]string)
 	m["Content-Type"] = "application/json; charset=utf-8"
 	//post method to be made properly here
-	r := url.Post(e.CollectorUrl)
-	//
-	e.StoreRequestResults(r)
+	// r := http.Post(e.CollectorUrl) //Need more arguements
+	// e.StoreRequestResults(r)
 }
 
 // Returns an array formatted to be ready for a POST request
-func (e *Emitter) ReturnPostRequest( ) []string {
-	dataPostRequest := make(map[string][]map[string]string)
-	dataPostRequest["schema"] = e.PostRequestSchema
+func (e *Emitter) ReturnPostRequest() map[string][]string {
+	// dataPostRequest := make(map[string][]map[string]string)
+	dataPostRequest := make(map[string][]string)
+	dataPostRequest["schema"] = append(dataPostRequest["schema"], e.PostRequestSchema)
 	for _, element := range e.Buffer {
-		append(dataPostRequest["data"], element)
+		dataPostRequest["data"] = append(dataPostRequest["data"], element)
 	}
 	return dataPostRequest
 }
@@ -143,12 +160,12 @@ func (e *Emitter) ReturnPostRequest( ) []string {
 // Stores all of the parameters of the request's response
 // into a dynamic array for use in unit testing
 // TODO(alexanderdean): is there a cleaner way of doing this?
-func (e *Emitter) StoreRequestResults(r RequestsResponse) {
-	storeArray = make(map[string]string)
-	storeArray["url"] = r.url
-	storeArray["code"] = r.StatusCode
-	storeArray["headers"] = r.headers
-	storeArray["body"] = r.body
-	storeArray["raw"] = r.raw
-	append(emitter.RequestsResult, storeArray)
-}
+// // func (e *Emitter) StoreRequestResults(r RequestsResponse) {
+// // 	storeArray = make(map[string]string)
+// // 	storeArray["url"] = r.url
+// // 	storeArray["code"] = r.StatusCode
+// // 	storeArray["headers"] = r.headers
+// // 	storeArray["body"] = r.body
+// // 	storeArray["raw"] = r.raw
+// // 	append(emitter.RequestsResult, storeArray)
+// }

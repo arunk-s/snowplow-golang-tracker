@@ -26,12 +26,12 @@ const (
 var TrackerSettings map[string]string
 
 type Subject struct {
-	p string
-	res string
-	vp string
-	uid string
-	cd string
-	tz string
+	p    string
+	res  string
+	vp   string
+	uid  string
+	cd   string
+	tz   string
 	lang string
 }
 

@@ -13,23 +13,24 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 express or implied. See the Apache License Version 2.0 for the specific
 language governing permissions and limitations there under.
 */
-package main
+package snowplowGo
 
 import (
-	"time"
+// "time"
+//    "crypto/md5"
 )
 
 const (
-	DEFAULT_BASE_64  = true
-	TRACKER_VERSION  = "golang-0.1.0"
+	DEFAULT_BASE_64 = true
+	TRACKER_VERSION = "golang-0.1.0"
 
-	SCHEMA_VENDOR    = "com.snowplowanalytics.snowplow"
-	SCHEMA_FORMAT    = "jsonschema"
+	// SCHEMA_VENDOR    = "com.snowplowanalytics.snowplow"
+	// SCHEMA_FORMAT    = "jsonschema"
 )
 
 type Tracker struct {
 	EncodeBase64 bool
-	StdNvPairs struct {
+	StdNvPairs   struct {
 		tv  string
 		tna string
 		aid string
@@ -42,27 +43,30 @@ type Tracker struct {
 }
 
 type Items struct {
-	sku string
-	price string 
+	sku      string
+	price    string
 	quantity string
-    name string 
-    category string
+	name     string
+	category string
 }
 
 // Initializes a new tracker instance with emitter(s) and a subject.
 func (t *Tracker) InitTracker(emitterTracker map[string]string, subject Subject, namespace string, AppId string, EncodeBase64 string) {
 
-	if len(emitterTracker) > 0 {
-		t.emitter = emitterTracker
-	} else {
-		t.emitter = emitterTracker
-	}
-	t.subject = subject
-	if t.EncodeBase64 != nil {
-		t.EncodeBase64 = StringToBool(t.EncodeBase64)
-	} else {
-		t.EncodeBase64 = DEFAULT_BASE_64
-	}
+	// what is the purpose of bounds checking, if doing the same thing
+	// if len(emitterTracker) > 0 {
+	// 	t.emitter = emitterTracker //Tracker don't have a emitter object
+	// } else {
+	// 	t.emitter = emitterTracker
+	// }
+	// t.subject = subject //Tracker don't have a subject object
+	// if t.EncodeBase64 {
+	// 	t.EncodeBase64 = StringToBool(t.EncodeBase64)
+	// } else {
+	// 	t.EncodeBase64 = DEFAULT_BASE_64
+	// }
+
+	t.EncodeBase64 = DEFAULT_BASE_64
 
 	t.StdNvPairs.tv = TRACKER_VERSION
 	t.StdNvPairs.tna = namespace
@@ -74,138 +78,142 @@ func (t *Tracker) InitTracker(emitterTracker map[string]string, subject Subject,
 }
 
 // Updates the tracker with a new subject
-func (t *Tracker) UpdateSubject(subject Subject) {
-	t.Subject = subject
-}
+// func (t *Tracker) UpdateSubject(subject Subject) {
+// 	t.Subject = subject
+// }
 
 // Appends another emitter to the tracker
-func (t *Tracker) AddEmitter(emitter Emitter) {
-	append(t.Emitter, emitter)
-}
+// func (t *Tracker) AddEmitter(emitter Emitter) {
+// 	append(t.Emitter, emitter)
+// }
 
 // Sends the Payload to the emitter for processing
 func (t *Tracker) SendRequest(payload Payload) {
-	finalPayload = ReturnArrayStringify("strval", payload)
-	for _, element := range t.Emitter {
-		element.SendEvent(finalPayload)
-	}
+	// finalPayload := ReturnArrayStringify("strval", payload) //What is ReturnArrayStringify
+	// for _, element := range t.Emitter {
+	// 	element.SendEvent(finalPayload)
+	// }
 }
 
 // Will force-send all events in the emitter(s) buffers.
 // This happens irrespective of whether or not buffer limit has been reached
-func FlushEmitters() {
-	for _, element = range s.Emitter {
-		element.Flush()
-	}
-}
+// func FlushEmitters() {
+// 	for _, element := range s.Emitter {
+// 		element.Flush()
+// 	}
+// }
 
 // Takes a Payload object as a parameter and appends all necessary event data to it
-func (t *Tracker) ReturnCompletePayload(payload Payload, context string) Payload{
+func (t *Tracker) ReturnCompletePayload(payload Payload, context string) Payload {
 	var contextEnvelope map[string]string
-	if context != nil {
-		contextEnvelope["schema"] = t.CONTEXT_SCHEMA 
+	if context != "" {
+		// contextEnvelope["schema"] = t.CONTEXT_SCHEMA
+		contextEnvelope["schema"] = t.JsonSchema.ContextSchema
 		contextEnvelope["data"] = context
-		payload.AddJson(contextEnvelope, t.EncodeBase64,"cx","co")
+		payload.AddJson(contextEnvelope, t.EncodeBase64, "cx", "co")
 	}
-	payload.AddDict(t.StdNvPairs)
-	payload.AddDict(t.s.GetSubject())
-	payload.Add("eid", payload.GenerateUuid())
+	// payload.AddDict(t.StdNvPairs)
+	// payload.AddDict(t.s.GetSubject())
+	// payload.Add("eid", payload.GenerateUuid())
 	return payload
 }
 
 // Returns a UUID for a time stamp in Nanoseconds
 // TODO(alexanderdean): replace with a UUID library
-func (t *Tracker) GenerateUuid() [Size]byte{
-	convert := time.Nanoseconds()
-	return md5.Sum(convert)
-}
+// func (t *Tracker) GenerateUuid() []byte {
+// 	convert,_ := time.Now().MarshalBinary()
+
+// 	return md5.Sum(convert)
+// }
 
 // Takes a Payload and a Context and forwards the finalised payload
 // map [string]string to the sendRequest function.
 func (t *Tracker) Track(payload Payload, context string) {
 	payload = t.ReturnCompletePayload(payload, context)
-	t.SendRequest(payload.Get())	
+	// t.SendRequest(payload.Get()) //Get method still undefined
 }
 
 // Tracks a page view.
 func (t *Tracker) TrackPageView(pageUrl string, pageTitle string, referrer string, context string, tstamp string) {
 	var payloadEp Payload
 	payloadEp.InitPayload(tstamp)
-	payloadEp.Add("e", "pv")
-	payloadEp.Add("url", pageUrl)
-	payloadEp.Add("page", pageTitle)
-	payloadEp.Add("refr", referrer)
+	// payloadEp.Add("e", pv)  //int64 expected
+	// payloadEp.Add("url", pageUrl)
+	// payloadEp.Add("page", pageTitle)
+	// payloadEp.Add("refr", referrer)
 	t.Track(payloadEp, context)
 }
 
 // Tracks a structured event with the aforementioned metrics
 func (t *Tracker) TrackStructEvent(category string, action string, label string, property string, value string, context string, tstamp string) {
-	ep := InitPayload(tstamp)
-	ep.Add("e", "se")
-	ep.Add("se_ca", category)
-	ep.Add("se_ac", action)
-	ep.Add("se_la", label)
-	ep.Add("se_pr", property)
-	ep.Add("se_va", value)
+	var ep Payload
+	ep.InitPayload(tstamp)
+	// ep.Add("e", "se")
+	// ep.Add("se_ca", category)
+	// ep.Add("se_ac", action)
+	// ep.Add("se_la", label)
+	// ep.Add("se_pr", property)
+	// ep.Add("se_va", value)
 	t.Track(ep, context)
 }
 
-// Creates an event for each item in the ecommerceTransaction item 
-func (t *Tracker) TrackEcommerceTransactionItems(orderId string, sku string, price float, quantity string, name string, category string, currency string, context string, tstamp string) {
-	ep := InitPayload(tstamp)
-	ep.Add("e", "ti")
-	ep.Add("ti_id", order_id)
-	ep.Add("ti_pr", price)
-	ep.Add("ti_sk", sku)
-	ep.Add("ti_qu", quantity)
-	ep.Add("ti_nm", name)
-	ep.Add("ti_ca", category)
-	ep.Add("ti_cu", currency)
+// Creates an event for each item in the ecommerceTransaction item
+func (t *Tracker) TrackEcommerceTransactionItems(orderId string, sku string, price float64, quantity string, name string, category string, currency string, context string, tstamp string) {
+	var ep Payload
+	ep.InitPayload(tstamp)
+	// ep.Add("e", "ti")
+	// ep.Add("ti_id", order_id)
+	// ep.Add("ti_pr", price)
+	// ep.Add("ti_sk", sku)
+	// ep.Add("ti_qu", quantity)
+	// ep.Add("ti_nm", name)
+	// ep.Add("ti_ca", category)
+	// ep.Add("ti_cu", currency)
 	t.Track(ep, context)
 }
 
 //Tracks an unstructured event with the aforementioned metrics
-func (t *Tracker) TrackUnstructEvent(eventJson string, context string, tstamp string){
+func (t *Tracker) TrackUnstructEvent(eventJson string, context string, tstamp string) {
 	var envelope map[string]string
 	envelope["schema"] = t.JsonSchema.UnstructEventSchema
 	envelope["data"] = eventJson
-	ep := InitPayload(tstamp)
-	ep.Add("e","ue")
+	var ep Payload
+	ep.InitPayload(tstamp)
+	// ep.Add("e", "ue")
 	ep.AddJson(envelope, t.EncodeBase64, "ue_px", "ue_pr")
 	t.Track(ep, context)
 }
 
-
 //Tracks a screen view event with the metrics
-func (t *Tracker) TrackScreenView(name string,id string, context string, tstamp string) {
+func (t *Tracker) TrackScreenView(name string, id string, context string, tstamp string) {
 	var ScreenViewProperties, epJson map[string]string
-	if name != nil {
+	if name != "" {
 		ScreenViewProperties["name"] = name
 	}
-	if id != nil {
-		ScreenViewProperties["id"] = id	
+	if id != "" {
+		ScreenViewProperties["id"] = id
 	}
 	epJson["schema"] = t.JsonSchema.ScreenViewSchema
-	epJson["data"] = ScreenViewProperties
-	t.TrackUnstructEvent(epJson, context, tstamp) 	
+	// epJson["data"] = ScreenViewProperties
+	// t.TrackUnstructEvent(epJson, context, tstamp) //cannot use epJson (map[string]string) as type string
 }
 
-
 //Tracks an ecommerce transaction event, can contain many items
-func TrackEcommerceTransaction(orderId string, totalValue string, currency string, affiliation string, taxValue string, shipping string, city string, state string, country string, items Items, context string, tstamp string) {
-	ep := InitPayload(tstamp)
-	ep.Add("e", "tr")
-    ep.Add("tr_id", orderId)
-    ep.Add("tr_tt", totalValue)
-    ep.Add("tr_cu", currency)
-    ep.Add("tr_af", affiliation)
-    ep.Add("tr_tx", taxValue)
-    ep.Add("tr_sh", shipping)
-    ep.Add("tr_ci", city)
-    ep.Add("tr_st", state)
-    ep.Add("tr_co", country)	
-    t.Track(ep, context)
-    for _,element := range items {
-    	t.TrackEcommerceTransactionItems(orderId, element.sku, element.price, element.quantity, element.name, element.category, currency, context, tstamp)
-	}
+func (t *Tracker) TrackEcommerceTransaction(orderId string, totalValue string, currency string, affiliation string, taxValue string, shipping string, city string, state string, country string, items Items, context string, tstamp string) {
+	var ep Payload
+	ep.InitPayload(tstamp)
+	// ep.Add("e", "tr")
+	// ep.Add("tr_id", orderId)
+	// ep.Add("tr_tt", totalValue)
+	// ep.Add("tr_cu", currency)
+	// ep.Add("tr_af", affiliation)
+	// ep.Add("tr_tx", taxValue)
+	// ep.Add("tr_sh", shipping)
+	// ep.Add("tr_ci", city)
+	// ep.Add("tr_st", state)
+	// ep.Add("tr_co", country)
+	t.Track(ep, context)
+	// for _, element := range items { //Cannot range over items of type Item
+	// t.TrackEcommerceTransactionItems(orderId, element.sku, element.price, element.quantity, element.name, element.category, currency, context, tstamp)
+	// }
 }
